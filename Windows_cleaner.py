@@ -63,29 +63,32 @@ class Cleaner:
         
     # spider and return the path of all the files in the sector and find out all empty directories
     def catch_tree(self, sector):
-        print("\t%s 遍历中 %s" % ("**"*6, "**"*6))
+        print("\t%s 遍历中,请稍等 %s" % ("**"*6, "**"*6))
         if len(sector) == 1:
             path = sector + ":\\"
         else:
             path = sector
+        
         for dir_name,folder,file in os.walk(path):
-            if len(folder) == 0 and len(file) == 0:
-                self.empty_dir.append(dir_name)
-            if ("Google" in dir_name) and ("Chrome" in dir_name) and ("Cache" in dir_name) and (dir_name != self.cache.get("chrome")):
-                self.cache["chrome"] = dir_name
-            if ("Mozilla" in dir_name) and ("Firefox" in dir_name) and ("cache" in dir_name) and (dir_name != self.cache.get("firefox")):
-                self.cache["firefox"] = dir_name
-            if ("360se" in dir_name) and ("Cache" in dir_name) and (dir_name != self.cache.get("360se")):
-                self.cache["360se"] = dir_name
-            if ("WeChat" in dir_name) and (r"\Files" in dir_name) and (dir_name != self.cache.get("wechat")):
-                self.cache["wechat"] = dir_name
-            if ("FileRecv" in dir_name) and ("Tencent" in dir_name) and (dir_name != self.cache.get("qq")):
-                self.cache["qq"] = dir_name
-            for i in file:
-                t = "%s\%s"%(dir_name,i)
-                self.is_empty(t)
+            try:
+                if len(folder) == 0 and len(file) == 0:
+                    self.empty_dir.append(dir_name)
+                if ("Google" in dir_name) and ("Chrome" in dir_name) and ("Cache" in dir_name) and (dir_name != self.cache.get("chrome")):
+                    self.cache["chrome"] = dir_name
+                if ("Mozilla" in dir_name) and ("Firefox" in dir_name) and ("cache" in dir_name) and (dir_name != self.cache.get("firefox")):
+                    self.cache["firefox"] = dir_name
+                if ("360se" in dir_name) and ("Cache" in dir_name) and (dir_name != self.cache.get("360se")):
+                    self.cache["360se"] = dir_name
+                if ("WeChat" in dir_name) and (r"\Files" in dir_name) and (dir_name != self.cache.get("wechat")):
+                    self.cache["wechat"] = dir_name
+                if ("FileRecv" in dir_name) and ("Tencent" in dir_name) and (dir_name != self.cache.get("qq")):
+                    self.cache["qq"] = dir_name
+                for i in file:
+                    t = "%s\%s"%(dir_name,i)
+                    self.is_empty(t)
+            except:
+                continue
         print("\t遍历完成")
-        #print(self.empty_files)
                 
     # judge whether the file is empty.
     def is_empty(self, path):
@@ -96,6 +99,7 @@ class Cleaner:
     def logger(self):
         t = str(time.strftime("%Y-%m-%d", time.localtime()))
         pth = ".\\backup\\%s\\empty.json" % (t)
+        dic = {}
         if not os.path.exists(".\\backup"):
             os.mkdir(".\\backup")
         self.log["date"] = t
@@ -105,17 +109,23 @@ class Cleaner:
             else:
                 mode = "w+"
             with open(pth, mode) as f:
-                try:
-                    log = loads(f.read())
-                except:
+                if os.path.getsize(pth) == 0:
                     log = {}
-            with open(pth, "w+") as f: 
-                f.write(dumps(dict(log, **self.log)))
+                else:
+                    log = loads(f.read())
+            with open(pth, "w+") as f:
+                for key, value in log.items():
+                    if log.get(key) != self.log.get(key):
+                        for i in value:
+                            self.log[key].append(i)
+                f.write(dumps(self.log))
         else:
             os.mkdir(".\\backup\\%s" % (t))
             with open(pth, "w+") as f:  
-                log = loads(f.read())
-                print(dict(log, **self.log))
+                if os.path.getsize(pth) == 0:
+                    log = {}
+                else:
+                    log = loads(f.read())
                 f.write(dumps(dict(log, **self.log)))
     
     # clean the empty directories and files
@@ -127,18 +137,20 @@ class Cleaner:
             if 1 in self.chosen_func:
                 print("\t本次清理记录已被记录！")
                 self.log["empty_dir"] = self.empty_dir
+                self.logger()
                 print("\t开始清理~~")
                 for i in self.empty_dir:
                     os.rmdir(i)
             if 2 in self.chosen_func:
                 print("\t本次清理记录已被记录！")
                 self.log["empty_files"] = self.empty_files
+                self.logger()
                 print("\t开始清理~~")
                 for i in self.empty_files:
                     os.remove(i)
             #if 3 in self.chosen_func:
             
-            self.logger()
+            
             print("\t清理完成！")
         
     
@@ -180,6 +192,7 @@ class Cleaner:
                     f = open(i, "a+")
                     f.close()
                 except Exception as e:
+                    print("\t请先恢复上一层级的文件夹！")
                     logging.warning("%s %s"%(e, i))
         if 3 in log_num:
             pth = ".\\backup\\%s\\web_cache"%(backup_log["date"])
@@ -204,9 +217,9 @@ class Cleaner:
 if __name__ == "__main__":
     if not os.path.exists("./log"):
         os.mkdir("./log")
-    # initialize the format
-    logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s', \
-                        datefmt='%a, %d %b %Y %H:%M:%S', filename="log/debug.log", filemode='a')
     
-    Cleaner(r"D:\pyTool\aa")
+    logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s', \
+                        datefmt='%a, %d %b %Y %H:%M:%S', filename="log/debug.log", filemode='a')    # initialize the format  
+    
+    Cleaner(r"D")
     
