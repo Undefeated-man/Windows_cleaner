@@ -33,7 +33,7 @@ class Cleaner:
             3) clean the cache in Wechat/ Chrome/ Firefox/ QQ/ DingDing.
             4) find all the Word/Excel/PPT files.
             5) keep cleaning log.
-            6) recover-available within 30 days.
+            6) restore-available within 30 days.
             7) GUI.
     """
     def __init__(self, sector = "c"):
@@ -101,6 +101,7 @@ class Cleaner:
         pth = ".\\backup\\%s\\empty.json" % (t)
         dic = {}
         if not os.path.exists(".\\backup"):
+            print("\tmaking directory 'backup'...")
             os.mkdir(".\\backup")
         self.log["date"] = t
         if os.path.exists(".\\backup\\%s" % (t)):
@@ -131,7 +132,7 @@ class Cleaner:
     # clean the empty directories and files
     def clean(self):
         if 0 in self.chosen_func:
-            self.recover()
+            self.restore()
             print("\t恢复完成！")
         else:
             if 1 in self.chosen_func:
@@ -154,8 +155,8 @@ class Cleaner:
             print("\t清理完成！")
         
     
-    # recover the files/directories
-    def recover(self):
+    # restore the files/directories
+    def restore(self):
         r_lst = os.listdir(".\\backup")  # get the backup records
         func = ["1. 空文件夹", "2. 空文件", "3. 网页缓存", "4. 微信缓存", "5. QQ缓存", "6. 各个在线会议软件的缓存"] 
         log_num = []
@@ -216,10 +217,14 @@ class Cleaner:
     
 if __name__ == "__main__":
     if not os.path.exists("./log"):
+        print("\tmaking directory 'log'...")
         os.mkdir("./log")
     
     logging.basicConfig(level=logging.DEBUG,format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s', \
                         datefmt='%a, %d %b %Y %H:%M:%S', filename="log/debug.log", filemode='a')    # initialize the format  
     
-    Cleaner(r"D")
+    try:
+        Cleaner(r"D")
+    except Exception as e:
+        logging.error(e)
     
