@@ -5,7 +5,7 @@
 	#		                                                                  #
 	#		Filename: Windows_cleaner.py                                      #
 	#		                                                                  #
-	#		Programmer: Vincent Holmes                                        #
+	#		Programmer: Vincent Holmes (Vincent_HolmesZ@outlook.com)          #
 	#		                                                                  #
 	#		Description: Clean the trash in your computer and you can recov   #
 	#                     er it within 30 days.                               #
